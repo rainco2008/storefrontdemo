@@ -1,24 +1,26 @@
-# Astro 商城前端模板
+# Storefront Demo
 
-这是一个基于 Astro 的商城前端模板，当前目标是先完成可独立部署的前端程序，再逐步接入 Payload CMS 作为后台。
+Astro + React storefront demo targeting Cloudflare Workers.
 
-项目已经配置为优先使用本地 mock 数据，因此不依赖 Payload CMS、原始 Storefront API 或其他后端服务也可以运行和部署。后续接入 Payload 时，只需要在现有的数据客户端边界上替换数据来源。
+The app is currently wired to local mock commerce data so it can run, test, build, and deploy without a backend service. The data boundary is intentionally kept behind the `storefront:client` alias, which makes it straightforward to replace the mock client with Payload CMS or another commerce API later.
 
-## 技术栈
+## Stack
 
-- Astro `6.4.6`：页面路由、服务端渲染和构建
-- `@astrojs/cloudflare` `13.7.0`：Cloudflare Workers adapter
-- Wrangler `4.100.0`：Cloudflare Workers 部署 CLI
-- SolidJS `1.8.22` + `@astrojs/solid-js` `6.0.1`：购物车抽屉、商品交互等局部交互组件
-- Tailwind CSS `3.4.11` + `@astrojs/tailwind` `6.0.2`：样式系统
-- Astro Actions：购物车会话操作
-- Zod `4.4.3`：表单和 action 输入校验
-- Stripe `16.6.0`：可选支付服务，默认未配置时不会阻塞部署
-- Payload CMS：计划接入的后台系统
+- Astro `6.4.6` with server output
+- React `19.2.7` for interactive islands
+- TanStack React Query `5.101.0` for cart-side client state and mutations
+- Tailwind CSS `3.4.19`
+- Cloudflare Workers via `@astrojs/cloudflare` `13.7.0`
+- Wrangler `4.100.0`
+- Stripe `22.2.1` for optional checkout
+- Zod `4.4.3`
+- Biome, Astro Check, TypeScript, Vitest, and Playwright
 
-## 当前状态
+Node.js `22.12.0` or newer is expected. The package manager is pinned to `pnpm@9.10.0`.
 
-前端默认使用 `src/lib/client.mock.ts` 中的 mock 商品和集合数据。这个配置来自 `tsconfig.json`：
+## Current Behavior
+
+The storefront uses `src/lib/client.mock.ts` by default. This is configured in `tsconfig.json`:
 
 ```json
 {
@@ -30,139 +32,156 @@
 }
 ```
 
-因此商品列表、集合页、商品详情页和购物车基础功能可以在没有 Payload CMS 的情况下工作。
+The mock client provides products, collections, customers, and orders. Product listing, collection pages, product detail pages, cart interactions, and the order success page can all work without Payload CMS or a separate Storefront API.
 
-支付功能默认处于未配置状态。如果没有 Stripe 环境变量，checkout API 会返回 `503`，不会影响站点构建和部署。
+Checkout is optional. If Stripe environment variables are not configured, the checkout API returns `503` instead of blocking build or deployment.
 
-## 项目结构
+## Project Layout
 
-```sh
-├── public/                  # 静态资源
-├── src/
-│   ├── actions/             # Astro Actions
-│   ├── components/          # 通用组件和布局组件
-│   ├── features/            # 商品、集合、购物车等业务模块
-│   ├── lib/                 # 数据客户端、工具函数、类型
-│   ├── pages/               # Astro 文件路由
-│   └── styles.css           # 全局样式
-├── astro.config.ts          # Astro 和 Cloudflare adapter 配置
-├── tsconfig.json            # 路径别名和 TypeScript 配置
-├── wrangler.toml            # Cloudflare Workers 配置
-└── package.json
+```text
+public/                 Static assets
+src/actions/            Astro actions
+src/components/         Shared layout and UI components
+src/features/cart/      Cart actions, queries, store, and React islands
+src/features/product/   Product display and carousel islands
+src/lib/                Data clients, schemas, utilities, and tests
+src/pages/              Astro file routes and API routes
+src/styles.css          Global styles
+astro.config.ts         Astro integrations and Cloudflare adapter
+playwright.config.ts    E2E test configuration
+wrangler.toml           Cloudflare Workers project configuration
 ```
 
-## 本地开发
+## Routes
 
-安装依赖：
+- `/` - home page
+- `/products/[product]` - product detail
+- `/collections/[collection]` - collection detail
+- `/orders/[order]` - order success page
+- `/api/checkout` - Stripe checkout session endpoint
+- `/api/checkout/success` - checkout success callback
+- `/404` and `/500` - error pages
+
+## Development
+
+Install dependencies:
 
 ```sh
 pnpm install
 ```
 
-启动开发服务器：
+Start the local dev server:
 
 ```sh
 pnpm dev
 ```
 
-生产构建：
+Run the main checks:
 
 ```sh
+pnpm lint
+pnpm vitest run
 pnpm build
 ```
 
-类型检查：
+Run Playwright E2E tests:
 
 ```sh
-pnpm astro check
+pnpm test:e2e
 ```
 
-单元测试：
+On a fresh Linux or WSL machine, Playwright may also need browser and system dependencies:
 
 ```sh
-pnpm vitest run
+pnpm exec playwright install
+sudo pnpm exec playwright install-deps
 ```
 
-## Cloudflare Workers 部署
+## Scripts
 
-项目已使用 `@astrojs/cloudflare` adapter，并包含 `wrangler.toml`。
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start Astro dev server |
+| `pnpm build` | Build the Cloudflare Workers output |
+| `pnpm deploy:workers` | Build and deploy with Wrangler |
+| `pnpm lint` | Run Astro sync, Biome, Astro Check, and TypeScript build |
+| `pnpm vitest run` | Run unit tests once |
+| `pnpm test:e2e` | Run Playwright tests |
+| `pnpm format` | Run Biome and Prettier formatting |
 
-一键部署：
+## Environment Variables
 
-[Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/?url=https://github.com/rainco2008/storefront)
+No environment variables are required for the mock storefront to build.
 
-本地登录 Cloudflare：
+Stripe checkout:
+
+| Variable | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe server secret key |
+| `US_SHIPPING_RATE_ID` | Stripe shipping rate for US orders |
+| `INTERNATIONAL_SHIPPING_RATE_ID` | Stripe shipping rate for non-US orders |
+
+Transactional email:
+
+| Variable | Purpose |
+| --- | --- |
+| `LOOPS_API_KEY` | Loops API key |
+| `LOOPS_SHOP_TRANSACTIONAL_ID` | Customer order email template |
+| `LOOPS_FULFILLMENT_TRANSACTIONAL_ID` | Fulfillment notification template |
+| `LOOPS_FULFILLMENT_EMAIL` | Fulfillment recipient email |
+
+Maps and analytics:
+
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_GEOLOCATION_SERVER_KEY` | Server-side geolocation key |
+| `PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | Browser Google Maps key |
+| `PUBLIC_FATHOM_SITE_ID` | Fathom analytics site ID |
+
+Only variables prefixed with `PUBLIC_` are exposed to browser code.
+
+## Cloudflare Deployment
+
+The app is configured for Cloudflare Workers through `@astrojs/cloudflare`.
+
+Deploy from a local authenticated Wrangler session:
 
 ```sh
 pnpm wrangler login
-```
-
-构建并部署到 Cloudflare Workers：
-
-```sh
 pnpm deploy:workers
 ```
 
-这个命令会先运行 `pnpm build`，然后使用 Astro 生成的 Workers 配置部署：
+Cloudflare Git integration settings:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `pnpm build` |
+| Deploy command | `pnpm deploy:workers` |
+| Node.js version | `22.12.0` or newer |
+
+The deploy script runs `pnpm build` first, then deploys the generated Workers config:
 
 ```sh
 wrangler deploy --config dist/server/wrangler.json
 ```
 
-Cloudflare Workers 推荐配置：
+## Wrangler Punycode Patch
 
-| 配置项 | 值 |
-| --- | --- |
-| Build command | `pnpm build` |
-| Deploy command | `pnpm deploy:workers` |
-| Node.js version | `22.12.0` 或更高 |
+Node.js emits `[DEP0040]` when a package loads the built-in `punycode` module. In this project the warning came from `wrangler@4.100.0`, whose bundled CLI includes old `whatwg-url` and `tr46` code that calls `require("punycode")`.
 
-如果使用 Cloudflare 控制台或 Git 集成，请确保仓库地址与一键部署链接中的 GitHub URL 一致。
+The repository carries a pnpm patch at `patches/wrangler@4.100.0.patch` that replaces those bundled calls with a small compatibility object backed by Node's stable `node:url` domain conversion APIs. This removes the Node deprecation warning during `pnpm build` without suppressing warnings globally.
 
-## 环境变量
+If Wrangler is upgraded, re-test `pnpm build`. If upstream has removed the deprecated call, the local patch can be dropped.
 
-当前前端不需要任何环境变量即可构建和部署。
+## Replacing Mock Data
 
-启用 Stripe checkout 时需要配置：
+Keep application code pointed at `storefront:client`. To connect Payload CMS or another backend, add a compatible client such as:
 
-| 变量名 | 说明 |
-| --- | --- |
-| `STRIPE_SECRET_KEY` | Stripe 服务端密钥 |
-| `US_SHIPPING_RATE_ID` | Stripe 美国配送费率 ID |
-| `INTERNATIONAL_SHIPPING_RATE_ID` | Stripe 国际配送费率 ID |
-
-启用订单邮件时可配置：
-
-| 变量名 | 说明 |
-| --- | --- |
-| `LOOPS_API_KEY` | Loops API Key |
-| `LOOPS_SHOP_TRANSACTIONAL_ID` | 客户订单确认邮件模板 ID |
-| `LOOPS_FULFILLMENT_TRANSACTIONAL_ID` | 商家履约通知邮件模板 ID |
-| `LOOPS_FULFILLMENT_EMAIL` | 商家接收履约通知的邮箱 |
-
-启用地图展示时可配置：
-
-| 变量名 | 说明 |
-| --- | --- |
-| `GOOGLE_GEOLOCATION_SERVER_KEY` | 服务端 Geolocation API Key |
-| `PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | 浏览器端 Google Maps API Key |
-
-浏览器端可读取的变量必须使用 `PUBLIC_` 前缀，例如：
-
-```sh
-PUBLIC_FATHOM_SITE_ID=xxxx
-PUBLIC_GOOGLE_MAPS_BROWSER_KEY=xxxx
-```
-
-## Payload CMS 接入计划
-
-当前建议保留 `storefront:client` 作为数据访问边界。接入 Payload 时可以新增一个 Payload 客户端，例如：
-
-```sh
+```text
 src/lib/client.payload.ts
 ```
 
-然后在 `tsconfig.json` 中把 alias 从 mock client 切换到 Payload client：
+Then update the alias:
 
 ```diff
 {
@@ -175,34 +194,4 @@ src/lib/client.payload.ts
 }
 ```
 
-Payload client 需要实现与 `src/lib/client.mock.ts` 相同的函数接口，例如：
-
-- `getProducts`
-- `getProductById`
-- `getCollections`
-- `getCollectionById`
-- `createCustomer`
-- `createOrder`
-- `getOrderById`
-
-这样页面、购物车和 checkout 逻辑不需要大范围重写。
-
-## 常用脚本
-
-| 命令 | 说明 |
-| --- | --- |
-| `pnpm dev` | 启动本地开发服务器 |
-| `pnpm build` | 构建生产版本 |
-| `pnpm deploy:workers` | 构建并部署到 Cloudflare Workers |
-| `pnpm astro check` | Astro 类型检查 |
-| `pnpm vitest run` | 运行单元测试 |
-| `pnpm test:e2e` | 运行 Playwright 端到端测试 |
-| `pnpm format` | 格式化代码 |
-| `pnpm lint` | 运行 lint 和类型检查 |
-
-## 注意事项
-
-- 当前商品和集合数据来自 mock 文件，不是 Payload CMS。
-- checkout 支付流程需要 Stripe 变量配置后才可用。
-- 后续接入 Payload 时，优先替换数据客户端，不建议直接在页面组件中写 Payload 请求。
-- Cloudflare Workers 部署时使用 `pnpm deploy:workers`，不要直接部署未构建的源码目录。
+The replacement client should preserve the functions currently used by pages and server actions, including product, collection, customer, and order operations.
