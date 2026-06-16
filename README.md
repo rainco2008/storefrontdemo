@@ -1,26 +1,26 @@
 # Storefront Demo
 
-Astro + React storefront demo targeting Cloudflare Workers.
+这是一个基于 Astro + React 的商城前端示例项目，目标运行环境是 Cloudflare Workers。
 
-The app is currently wired to local mock commerce data so it can run, test, build, and deploy without a backend service. The data boundary is intentionally kept behind the `storefront:client` alias, which makes it straightforward to replace the mock client with Payload CMS or another commerce API later.
+当前项目默认使用本地 mock 商城数据，因此不依赖 Payload CMS、原始 Storefront API 或其他后端服务，也可以完成本地开发、测试、构建和部署。数据访问被收敛在 `storefront:client` 这个别名后面，后续接入 Payload CMS 或其他 Commerce API 时，只需要替换这个客户端实现。
 
-## Stack
+## 技术栈
 
-- Astro `6.4.6` with server output
-- React `19.2.7` for interactive islands
-- TanStack React Query `5.101.0` for cart-side client state and mutations
+- Astro `6.4.6`，使用 server output
+- React `19.2.7`，用于局部交互组件
+- TanStack React Query `5.101.0`，用于购物车侧的客户端状态和 mutation
 - Tailwind CSS `3.4.19`
-- Cloudflare Workers via `@astrojs/cloudflare` `13.7.0`
+- `@astrojs/cloudflare` `13.7.0`，用于 Cloudflare Workers 适配
 - Wrangler `4.100.0`
-- Stripe `22.2.1` for optional checkout
+- Stripe `22.2.1`，用于可选 checkout 流程
 - Zod `4.4.3`
-- Biome, Astro Check, TypeScript, Vitest, and Playwright
+- Biome、Astro Check、TypeScript、Vitest、Playwright
 
-Node.js `22.12.0` or newer is expected. The package manager is pinned to `pnpm@9.10.0`.
+要求 Node.js `22.12.0` 或更高版本。包管理器固定为 `pnpm@9.10.0`。
 
-## Current Behavior
+## 当前状态
 
-The storefront uses `src/lib/client.mock.ts` by default. This is configured in `tsconfig.json`:
+项目默认使用 `src/lib/client.mock.ts` 作为数据来源。这个配置位于 `tsconfig.json`：
 
 ```json
 {
@@ -32,51 +32,51 @@ The storefront uses `src/lib/client.mock.ts` by default. This is configured in `
 }
 ```
 
-The mock client provides products, collections, customers, and orders. Product listing, collection pages, product detail pages, cart interactions, and the order success page can all work without Payload CMS or a separate Storefront API.
+mock client 提供商品、集合、客户和订单数据。商品列表、集合页、商品详情页、购物车交互和订单成功页都可以在没有后端服务的情况下运行。
 
-Checkout is optional. If Stripe environment variables are not configured, the checkout API returns `503` instead of blocking build or deployment.
+checkout 是可选能力。如果没有配置 Stripe 环境变量，checkout API 会返回 `503`，但不会阻塞站点构建或部署。
 
-## Project Layout
+## 项目结构
 
 ```text
-public/                 Static assets
+public/                 静态资源
 src/actions/            Astro actions
-src/components/         Shared layout and UI components
-src/features/cart/      Cart actions, queries, store, and React islands
-src/features/product/   Product display and carousel islands
-src/lib/                Data clients, schemas, utilities, and tests
-src/pages/              Astro file routes and API routes
-src/styles.css          Global styles
-astro.config.ts         Astro integrations and Cloudflare adapter
-playwright.config.ts    E2E test configuration
-wrangler.toml           Cloudflare Workers project configuration
+src/components/         通用布局和 UI 组件
+src/features/cart/      购物车 actions、queries、store 和 React islands
+src/features/product/   商品展示和轮播相关 islands
+src/lib/                数据客户端、schema、工具函数和测试
+src/pages/              Astro 文件路由和 API 路由
+src/styles.css          全局样式
+astro.config.ts         Astro integrations 和 Cloudflare adapter 配置
+playwright.config.ts    E2E 测试配置
+wrangler.toml           Cloudflare Workers 项目配置
 ```
 
-## Routes
+## 路由
 
-- `/` - home page
-- `/products/[product]` - product detail
-- `/collections/[collection]` - collection detail
-- `/orders/[order]` - order success page
-- `/api/checkout` - Stripe checkout session endpoint
-- `/api/checkout/success` - checkout success callback
-- `/404` and `/500` - error pages
+- `/` - 首页
+- `/products/[product]` - 商品详情页
+- `/collections/[collection]` - 集合详情页
+- `/orders/[order]` - 订单成功页
+- `/api/checkout` - Stripe checkout session 接口
+- `/api/checkout/success` - checkout 成功回调
+- `/404` 和 `/500` - 错误页
 
-## Development
+## 本地开发
 
-Install dependencies:
+安装依赖：
 
 ```sh
 pnpm install
 ```
 
-Start the local dev server:
+启动开发服务器：
 
 ```sh
 pnpm dev
 ```
 
-Run the main checks:
+运行主要检查：
 
 ```sh
 pnpm lint
@@ -84,104 +84,104 @@ pnpm vitest run
 pnpm build
 ```
 
-Run Playwright E2E tests:
+运行 Playwright E2E 测试：
 
 ```sh
 pnpm test:e2e
 ```
 
-On a fresh Linux or WSL machine, Playwright may also need browser and system dependencies:
+在新的 Linux 或 WSL 环境中，Playwright 可能还需要安装浏览器和系统依赖：
 
 ```sh
 pnpm exec playwright install
 sudo pnpm exec playwright install-deps
 ```
 
-## Scripts
+## 常用脚本
 
-| Command | Purpose |
+| 命令 | 说明 |
 | --- | --- |
-| `pnpm dev` | Start Astro dev server |
-| `pnpm build` | Build the Cloudflare Workers output |
-| `pnpm deploy:workers` | Build and deploy with Wrangler |
-| `pnpm lint` | Run Astro sync, Biome, Astro Check, and TypeScript build |
-| `pnpm vitest run` | Run unit tests once |
-| `pnpm test:e2e` | Run Playwright tests |
-| `pnpm format` | Run Biome and Prettier formatting |
+| `pnpm dev` | 启动 Astro 开发服务器 |
+| `pnpm build` | 构建 Cloudflare Workers 输出 |
+| `pnpm deploy:workers` | 构建并通过 Wrangler 部署 |
+| `pnpm lint` | 运行 Astro sync、Biome、Astro Check 和 TypeScript build |
+| `pnpm vitest run` | 运行一次单元测试 |
+| `pnpm test:e2e` | 运行 Playwright 测试 |
+| `pnpm format` | 运行 Biome 和 Prettier 格式化 |
 
-## Environment Variables
+## 环境变量
 
-No environment variables are required for the mock storefront to build.
+mock storefront 不需要任何环境变量即可构建。
 
-Stripe checkout:
+Stripe checkout：
 
-| Variable | Purpose |
+| 变量名 | 说明 |
 | --- | --- |
-| `STRIPE_SECRET_KEY` | Stripe server secret key |
-| `US_SHIPPING_RATE_ID` | Stripe shipping rate for US orders |
-| `INTERNATIONAL_SHIPPING_RATE_ID` | Stripe shipping rate for non-US orders |
+| `STRIPE_SECRET_KEY` | Stripe 服务端密钥 |
+| `US_SHIPPING_RATE_ID` | 美国订单配送费率 |
+| `INTERNATIONAL_SHIPPING_RATE_ID` | 非美国订单配送费率 |
 
-Transactional email:
+交易邮件：
 
-| Variable | Purpose |
+| 变量名 | 说明 |
 | --- | --- |
 | `LOOPS_API_KEY` | Loops API key |
-| `LOOPS_SHOP_TRANSACTIONAL_ID` | Customer order email template |
-| `LOOPS_FULFILLMENT_TRANSACTIONAL_ID` | Fulfillment notification template |
-| `LOOPS_FULFILLMENT_EMAIL` | Fulfillment recipient email |
+| `LOOPS_SHOP_TRANSACTIONAL_ID` | 客户订单邮件模板 |
+| `LOOPS_FULFILLMENT_TRANSACTIONAL_ID` | 履约通知邮件模板 |
+| `LOOPS_FULFILLMENT_EMAIL` | 履约通知收件邮箱 |
 
-Maps and analytics:
+地图和统计：
 
-| Variable | Purpose |
+| 变量名 | 说明 |
 | --- | --- |
-| `GOOGLE_GEOLOCATION_SERVER_KEY` | Server-side geolocation key |
-| `PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | Browser Google Maps key |
+| `GOOGLE_GEOLOCATION_SERVER_KEY` | 服务端 geolocation key |
+| `PUBLIC_GOOGLE_MAPS_BROWSER_KEY` | 浏览器端 Google Maps key |
 | `PUBLIC_FATHOM_SITE_ID` | Fathom analytics site ID |
 
-Only variables prefixed with `PUBLIC_` are exposed to browser code.
+只有以 `PUBLIC_` 开头的变量会暴露给浏览器端代码。
 
-## Cloudflare Deployment
+## Cloudflare 部署
 
-The app is configured for Cloudflare Workers through `@astrojs/cloudflare`.
+项目通过 `@astrojs/cloudflare` 配置为 Cloudflare Workers 应用。
 
-Deploy from a local authenticated Wrangler session:
+本地通过 Wrangler 登录并部署：
 
 ```sh
 pnpm wrangler login
 pnpm deploy:workers
 ```
 
-Cloudflare Git integration settings:
+Cloudflare Git 集成建议配置：
 
-| Setting | Value |
+| 配置项 | 值 |
 | --- | --- |
 | Build command | `pnpm build` |
 | Deploy command | `pnpm deploy:workers` |
-| Node.js version | `22.12.0` or newer |
+| Node.js version | `22.12.0` 或更高 |
 
-The deploy script runs `pnpm build` first, then deploys the generated Workers config:
+部署脚本会先执行 `pnpm build`，然后使用 Astro 生成的 Workers 配置部署：
 
 ```sh
 wrangler deploy --config dist/server/wrangler.json
 ```
 
-## Wrangler Punycode Patch
+## Wrangler Punycode 补丁
 
-Node.js emits `[DEP0040]` when a package loads the built-in `punycode` module. In this project the warning came from `wrangler@4.100.0`, whose bundled CLI includes old `whatwg-url` and `tr46` code that calls `require("punycode")`.
+当某个包加载 Node 内置的 `punycode` 模块时，Node.js 会输出 `[DEP0040]` deprecation warning。本项目中的警告来自 `wrangler@4.100.0`，它打包的 CLI 中包含旧版 `whatwg-url` 和 `tr46` 代码，这些代码会调用 `require("punycode")`。
 
-The repository carries a pnpm patch at `patches/wrangler@4.100.0.patch` that replaces those bundled calls with a small compatibility object backed by Node's stable `node:url` domain conversion APIs. This removes the Node deprecation warning during `pnpm build` without suppressing warnings globally.
+仓库中包含 pnpm patch：`patches/wrangler@4.100.0.patch`。这个补丁将 Wrangler 打包代码里的 deprecated `punycode` 调用替换为一个基于 Node 稳定 `node:url` 域名转换 API 的兼容对象。这样可以在不全局屏蔽 warning 的前提下，消除 `pnpm build` 阶段的 Node deprecation warning。
 
-If Wrangler is upgraded, re-test `pnpm build`. If upstream has removed the deprecated call, the local patch can be dropped.
+如果后续升级 Wrangler，需要重新运行 `pnpm build` 验证。如果上游已经移除 deprecated 调用，可以删除这个本地 patch。
 
-## Replacing Mock Data
+## 替换 Mock 数据
 
-Keep application code pointed at `storefront:client`. To connect Payload CMS or another backend, add a compatible client such as:
+应用代码应继续通过 `storefront:client` 访问数据。接入 Payload CMS 或其他后端时，可以新增一个兼容客户端，例如：
 
 ```text
 src/lib/client.payload.ts
 ```
 
-Then update the alias:
+然后更新 alias：
 
 ```diff
 {
@@ -194,4 +194,4 @@ Then update the alias:
 }
 ```
 
-The replacement client should preserve the functions currently used by pages and server actions, including product, collection, customer, and order operations.
+替换客户端需要保持页面和 server actions 当前依赖的函数接口，包括商品、集合、客户和订单相关操作。
