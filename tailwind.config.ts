@@ -1,4 +1,3 @@
-import kobalte from '@kobalte/tailwindcss';
 import typography from '@tailwindcss/typography';
 import type { Config } from 'tailwindcss';
 import animate from 'tailwindcss-animate';
@@ -22,7 +21,6 @@ export default {
 	},
 	plugins: [
 		animate,
-		kobalte,
 		typography,
 		plugin(function customStyles(api) {
 			api.addUtilities({

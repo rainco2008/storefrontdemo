@@ -48,7 +48,7 @@ async function getGeoLocation(address: Exclude<Address, null>) {
 					.nonempty(),
 			})
 			.parse(await geo.clone().json());
-		return results[0]!.geometry.location;
+		return results[0]?.geometry.location;
 	} catch (error) {
 		if (geo) {
 			console.error(`Failed to get geo location from shipping address [${geo.status}]`, error);

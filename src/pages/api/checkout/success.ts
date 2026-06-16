@@ -86,7 +86,8 @@ async function createOrderFromStripe(
 	}
 	const customer = customerResponse.data;
 
-	const { shipping_details, customer_details } = session;
+	const { customer_details } = session;
+	const shippingDetails = session.collected_information?.shipping_details;
 	const customerAddressDetails = {
 		phone: session.customer_details?.phone ?? undefined,
 		company: session.customer_details?.name ?? undefined,
@@ -116,14 +117,14 @@ async function createOrderFromStripe(
 					productVariantId: metadata.productVariantId,
 				};
 			}),
-			shippingAddress: shipping_details
+			shippingAddress: shippingDetails
 				? {
-						line1: shipping_details.address?.line1 ?? '',
-						line2: shipping_details.address?.line2 ?? '',
-						city: shipping_details.address?.city ?? '',
-						province: shipping_details.address?.state ?? '',
-						country: shipping_details.address?.country ?? '',
-						postal: shipping_details.address?.postal_code ?? '',
+						line1: shippingDetails.address?.line1 ?? '',
+						line2: shippingDetails.address?.line2 ?? '',
+						city: shippingDetails.address?.city ?? '',
+						province: shippingDetails.address?.state ?? '',
+						country: shippingDetails.address?.country ?? '',
+						postal: shippingDetails.address?.postal_code ?? '',
 						...customerAddressDetails,
 					}
 				: undefined,

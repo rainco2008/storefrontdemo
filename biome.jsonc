@@ -1,23 +1,34 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-	"organizeImports": {
-		"enabled": true
+	"$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"style": {
-				"all": false,
 				"useNodejsImportProtocol": "warn",
-				"noUnusedTemplateLiteral": "off"
+				"noUnusedTemplateLiteral": "off",
+				"useImportType": "off",
+				"useTemplate": "off"
 			},
 			"correctness": {
-				"noUnusedImports": "warn"
+				"noUnusedImports": "warn",
+				"noUnusedVariables": "off",
+				"noUnknownFunction": "off"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "off"
 			},
 			"suspicious": {
 				"noImplicitAnyLet": "off",
-				"noEmptyInterface": "off"
+				"noEmptyInterface": "off",
+				"noUnknownAtRules": "off"
 			}
 		}
 	},
@@ -29,20 +40,24 @@
 	"formatter": {
 		"enabled": false
 	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
 	"overrides": [
 		{
-			"include": ["**/*.astro"],
+			"includes": ["**/*.astro"],
 			"linter": {
 				"rules": {
 					"correctness": {
-						// biome doesn't recognize import usages in astro templates
 						"noUnusedImports": "off"
 					}
 				}
 			}
 		},
 		{
-			"include": ["tsconfig.json", "tsconfig.*.json", "turbo.json"],
+			"includes": ["tsconfig.json", "tsconfig.*.json", "turbo.json"],
 			"json": {
 				"parser": {
 					"allowComments": true,
