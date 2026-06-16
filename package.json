@@ -11,6 +11,9 @@
 		"overrides": {
 			"esbuild": "0.28.1",
 			"yaml": "2.8.3"
+		},
+		"patchedDependencies": {
+			"wrangler@4.100.0": "patches/wrangler@4.100.0.patch"
 		}
 	},
 	"scripts": {
