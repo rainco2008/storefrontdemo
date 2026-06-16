@@ -3,12 +3,12 @@
 	"include": ["src", "astro.config.ts", "openapi-ts.config.ts"],
 	"compilerOptions": {
 		"exactOptionalPropertyTypes": false,
+		"ignoreDeprecations": "6.0",
 		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./src/*"],
 			"storefront:client": ["./src/lib/client.mock.ts"]
 		},
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js"
+		"jsx": "react-jsx"
 	}
 }

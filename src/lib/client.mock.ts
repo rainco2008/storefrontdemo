@@ -1,7 +1,5 @@
 // This file contains mock functions for all storefront services.
 // You can use this as a template to connect your own ecommerce provider.
-
-import type { Options, RequestResult } from '@hey-api/client-fetch';
 import type {
 	Collection,
 	CreateCustomerData,
@@ -31,9 +29,41 @@ import type {
 
 export * from './client.types.ts';
 
-export const getProducts = <ThrowOnError extends boolean = false>(
-	options?: Options<GetProductsData, ThrowOnError>,
-): RequestResult<GetProductsResponse, GetProductsError, ThrowOnError> => {
+type RequestOptions<TData> = TData extends { path: infer TPath }
+	? {
+			query?: TData extends { query?: infer TQuery } ? TQuery : never;
+			path: TPath;
+			body?: TData extends { body?: infer TBody } ? TBody : never;
+			throwOnError?: boolean;
+		}
+	: TData extends { query?: infer TQuery; body?: infer TBody }
+		? {
+				query?: TQuery;
+				body?: TBody;
+				throwOnError?: boolean;
+			}
+		: {
+				throwOnError?: boolean;
+			};
+
+type MockResult<TData, TError> = Promise<
+	| {
+			data: TData;
+			error: undefined;
+			request: Request;
+			response: Response;
+		}
+	| {
+			data: undefined;
+			error: TError;
+			request: Request;
+			response: Response;
+		}
+>;
+
+export const getProducts = (
+	options?: RequestOptions<GetProductsData>,
+): MockResult<GetProductsResponse, GetProductsError> => {
 	let items = Object.values(products);
 	if (options?.query?.collectionId) {
 		const collectionId = options.query.collectionId;
@@ -58,39 +88,39 @@ export const getProducts = <ThrowOnError extends boolean = false>(
 	return asResult({ items, next: null });
 };
 
-export const getProductById = <ThrowOnError extends boolean = false>(
-	options: Options<GetProductByIdData, ThrowOnError>,
-): RequestResult<GetProductByIdResponse, GetProductByIdError, ThrowOnError> => {
+export const getProductById = (
+	options: RequestOptions<GetProductByIdData>,
+): MockResult<GetProductByIdResponse, GetProductByIdError> => {
 	const product = products[options.path.id];
 	if (!product) {
 		const error = asError<GetProductByIdError>({ error: 'not-found' });
 		if (options.throwOnError) throw error;
-		return error as RequestResult<GetProductByIdResponse, GetProductByIdError, ThrowOnError>;
+		return error;
 	}
 	return asResult(product);
 };
 
-export const getCollections = <ThrowOnError extends boolean = false>(
-	_options?: Options<GetCollectionsData, ThrowOnError>,
-): RequestResult<GetCollectionsResponse, GetCollectionsError, ThrowOnError> => {
+export const getCollections = (
+	_options?: RequestOptions<GetCollectionsData>,
+): MockResult<GetCollectionsResponse, GetCollectionsError> => {
 	return asResult({ items: Object.values(collections), next: null });
 };
 
-export const getCollectionById = <ThrowOnError extends boolean = false>(
-	options: Options<GetCollectionByIdData, ThrowOnError>,
-): RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, ThrowOnError> => {
+export const getCollectionById = (
+	options: RequestOptions<GetCollectionByIdData>,
+): MockResult<GetCollectionByIdResponse, GetCollectionByIdError> => {
 	const collection = collections[options.path.id];
 	if (!collection) {
 		const error = asError<GetCollectionByIdError>({ error: 'not-found' });
 		if (options.throwOnError) throw error;
-		return error as RequestResult<GetCollectionByIdResponse, GetCollectionByIdError, ThrowOnError>;
+		return error;
 	}
 	return asResult({ ...collection, products: [] });
 };
 
-export const createCustomer = <ThrowOnError extends boolean = false>(
-	options?: Options<CreateCustomerData, ThrowOnError>,
-): RequestResult<CreateCustomerResponse, CreateCustomerError, ThrowOnError> => {
+export const createCustomer = (
+	options?: RequestOptions<CreateCustomerData>,
+): MockResult<CreateCustomerResponse, CreateCustomerError> => {
 	if (!options?.body) throw new Error('No body provided');
 	return asResult({
 		...options.body,
@@ -103,9 +133,9 @@ export const createCustomer = <ThrowOnError extends boolean = false>(
 
 const orders: Record<string, Order> = {};
 
-export const createOrder = <ThrowOnError extends boolean = false>(
-	options?: Options<CreateOrderData, ThrowOnError>,
-): RequestResult<CreateOrderResponse, CreateOrderError, ThrowOnError> => {
+export const createOrder = (
+	options?: RequestOptions<CreateOrderData>,
+): MockResult<CreateOrderResponse, CreateOrderError> => {
 	if (!options?.body) throw new Error('No body provided');
 	const order: Order = {
 		...options.body,
@@ -126,14 +156,14 @@ export const createOrder = <ThrowOnError extends boolean = false>(
 	return asResult(order);
 };
 
-export const getOrderById = <ThrowOnError extends boolean = false>(
-	options: Options<GetOrderByIdData, ThrowOnError>,
-): RequestResult<GetOrderByIdResponse, GetOrderByIdError, ThrowOnError> => {
+export const getOrderById = (
+	options: RequestOptions<GetOrderByIdData>,
+): MockResult<GetOrderByIdResponse, GetOrderByIdError> => {
 	const order = orders[options.path.id];
 	if (!order) {
 		const error = asError<GetOrderByIdError>({ error: 'not-found' });
 		if (options.throwOnError) throw error;
-		return error as RequestResult<GetOrderByIdResponse, GetOrderByIdError, ThrowOnError>;
+		return error;
 	}
 	return asResult(order);
 };

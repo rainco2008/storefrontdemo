@@ -26,12 +26,10 @@ export function expandCartDataFromProducts(cartData: CartData, products: Product
 				product.variants.some((variant) => variant.id === item.productVariantId),
 			);
 			if (!product) {
-				console.warn(`Product not found for variant ${item.productVariantId}`);
-				return;
+				throw new Error(`Product not found for variant ${item.productVariantId}`);
 			}
 			return expandLineItem(item, product);
 		})
-		.filter(Boolean);
 }
 
 export function toCartData(cart: Cart): CartData {

@@ -5,15 +5,16 @@ import type { Product } from '../cart/cart.ts';
 type Props = {
 	price: Product['price'];
 	discount: Product['discount'];
+	className?: string;
 	class?: string;
 };
 
 export function ProductPrice(props: Props) {
 	return (
-		<span class={twMerge('flex gap-2 font-medium', props.class)}>
+		<span className={twMerge('flex gap-2 font-medium', props.className, props.class)}>
 			{formatProductPrice(props.price - props.discount)}
 			{props.discount > 0 && (
-				<span class="text-slate-400 line-through">{formatProductPrice(props.price)}</span>
+				<span className="text-slate-400 line-through">{formatProductPrice(props.price)}</span>
 			)}
 		</span>
 	);

@@ -5,13 +5,13 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('adding and deleting cart items', async ({ page }) => {
-	await page.goto('/lighthouse-100-sticker', { waitUntil: 'networkidle' });
+	await page.goto('/products/lighthouse-100-sticker', { waitUntil: 'networkidle' });
 	await page.getByRole('button', { name: 'Add to cart' }).click();
 	await expect(
 		page.getByRole('dialog', { name: 'Cart' }).getByText('Lighthouse 100 Sticker'),
 	).toBeVisible();
 
-	await page.goto('/astro-logo-curve-bill-snapback-cap', { waitUntil: 'networkidle' });
+	await page.goto('/products/astro-logo-curve-bill-snapback-cap', { waitUntil: 'networkidle' });
 	await page.getByRole('button', { name: 'Add to cart' }).click();
 	await expect(
 		page.getByRole('dialog', { name: 'Cart' }).getByText('Astro Logo Curve Bill Snapback Cap'),

@@ -4,6 +4,8 @@
 /// <reference types="astro/client" />
 import '@total-typescript/ts-reset';
 
+declare module '@fontsource-variable/inter';
+
 declare global {
 	interface ImportMetaEnv {
 		readonly STRIPE_SECRET_KEY?: string;

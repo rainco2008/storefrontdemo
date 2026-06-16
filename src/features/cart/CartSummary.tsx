@@ -1,66 +1,50 @@
-import { createQuery } from '@tanstack/solid-query';
-import { Index, Show } from 'solid-js';
+import { useQuery } from '@tanstack/react-query';
 import { formatProductPrice } from '~/lib/currency.ts';
-import { queryClient } from '~/lib/query.ts';
 import { button } from '~/styles.ts';
 import { CartItem } from './CartItem.tsx';
 import { cartQueryOptions } from './cart.queries.ts';
 
 export function CartSummary() {
-	const query = createQuery(
-		() => cartQueryOptions(),
-		() => queryClient,
+	const query = useQuery(cartQueryOptions());
+	const subtotal = query.data.items.reduce(
+		(total, item) =>
+			total +
+			(item.productVariant.product.price - (item.productVariant.product.discount ?? 0)) *
+				item.quantity,
+		0,
 	);
 
-	const subtotal = () =>
-		query.data.items.reduce(
-			(total, item) =>
-				total +
-				(item.productVariant.product.price - (item.productVariant.product.discount ?? 0)) *
-					item.quantity,
-			0,
-		);
-
-	// const discount = () =>
-	// 	query.data.items.reduce(
-	// 		(total, item) => total + (item.product.discount ?? 0) * item.quantity,
-	// 		0,
-	// 	);
-
-	// const total = () => subtotal() - discount();
-
 	return (
-		<div class="flex h-full min-h-0 flex-col">
-			<ul class="min-h-0 flex-1 overflow-y-auto">
-				<Index each={query.data.items} fallback={<CartEmptyState />}>
-					{(item) => <CartItem item={item()} class="border-b pb-3 pt-4" />}
-				</Index>
+		<div className="flex h-full min-h-0 flex-col">
+			<ul className="min-h-0 flex-1 overflow-y-auto">
+				{query.data.items.length === 0 ? (
+					<CartEmptyState />
+				) : (
+					query.data.items.map((item) => (
+						<CartItem key={item.id} item={item} className="border-b pb-3 pt-4" />
+					))
+				)}
 			</ul>
-			<Show when={query.data.items.length > 0}>
-				<dl class="grid grid-cols-[auto,1fr] gap-3 py-3 [&>dd]:text-right">
-					{/* <dt class="font-normal text-slate-600">Subtotal</dt>
-					<dd class="font-medium text-slate-700">{formatProductPrice(subtotal())}</dd>
-					<dt class="font-normal text-slate-600">Discount</dt>
-					<dd class="font-medium text-slate-700">{formatProductPrice(discount())}</dd>
-					<hr class="col-span-2 border-t border-slate-200" /> */}
-					<dt class="my-2 text-lg font-normal text-slate-600">Subtotal</dt>
-					<dd class="my-2 text-xl font-medium text-slate-700" data-testid="cart-total">
-						{formatProductPrice(subtotal())}
+			{query.data.items.length > 0 && (
+				<dl className="grid grid-cols-[auto,1fr] gap-3 py-3 [&>dd]:text-right">
+					<dt className="my-2 text-lg font-normal text-slate-600">Subtotal</dt>
+					<dd className="my-2 text-xl font-medium text-slate-700" data-testid="cart-total">
+						{formatProductPrice(subtotal)}
 					</dd>
 				</dl>
-			</Show>
+			)}
 		</div>
 	);
 }
 
 function CartEmptyState() {
 	return (
-		<div class="flex h-full flex-col items-center justify-center gap-8 p-4 text-center">
+		<div className="flex h-full flex-col items-center justify-center gap-8 p-4 text-center">
 			<EmptyStateCartGraphic />
 
-			<div data-testid="cart-empty" class="flex flex-col items-center gap-4">
-				<h2 class="text-lg font-medium text-gray-700">Your cart is empty</h2>
-				<a href="/" class={button({ className: 'mt-2' })}>
+			<div data-testid="cart-empty" className="flex flex-col items-center gap-4">
+				<h2 className="text-lg font-medium text-gray-700">Your cart is empty</h2>
+				<a href="/" className={button({ className: 'mt-2' })}>
 					Start shopping
 				</a>
 			</div>
@@ -78,10 +62,10 @@ function EmptyStateCartGraphic() {
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
-			<path d="M0 140H156" stroke="#E2E8F0" stroke-dasharray="2 2" />
-			<path d="M16 32H172" stroke="#E2E8F0" stroke-dasharray="2 2" />
-			<path d="M140 156L140 -5.30481e-06" stroke="#E2E8F0" stroke-dasharray="2 2" />
-			<path d="M32 168L32 12" stroke="#E2E8F0" stroke-dasharray="2 2" />
+			<path d="M0 140H156" stroke="#E2E8F0" strokeDasharray="2 2" />
+			<path d="M16 32H172" stroke="#E2E8F0" strokeDasharray="2 2" />
+			<path d="M140 156L140 -5.30481e-06" stroke="#E2E8F0" strokeDasharray="2 2" />
+			<path d="M32 168L32 12" stroke="#E2E8F0" strokeDasharray="2 2" />
 			<g filter="url(#filter0_dd_1142_19245)">
 				<rect width="100" height="100" transform="translate(36 36)" fill="#F8FAFC" />
 				<path
@@ -97,9 +81,9 @@ function EmptyStateCartGraphic() {
 					width="108"
 					height="109"
 					filterUnits="userSpaceOnUse"
-					color-interpolation-filters="sRGB"
+					colorInterpolationFilters="sRGB"
 				>
-					<feFlood flood-opacity="0" result="BackgroundImageFix" />
+					<feFlood floodOpacity="0" result="BackgroundImageFix" />
 					<feColorMatrix
 						in="SourceAlpha"
 						type="matrix"
